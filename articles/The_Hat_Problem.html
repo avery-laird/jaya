@@ -1,0 +1,36 @@
+<p>There's a famous math problem of which I recently became aware, commonly called "The Hat Check Problem" (or some variant).</p>
+<p>The problem usually goes something like this:</p>
+<p style="padding-left: 30px;">You are checking hats at a party, and neglect to mark the hats for idenification later. As more and more people arrive, you begin to lose track of who owns which hat. When the party ends and people begin to leave, you hand out hats at random, and hope for a correct match.</p>
+<p>There are a lot of predictions I made about what the probability (as a function of hats, or people) would look like -- all of them were wrong. The correct answer is awesomely inobvious.</p>
+<p>It seems quite reasonable to say that as the number of hats -- $n$ -- increases, the probability of an&nbsp;<strong>incorrect</strong> match -- $P$ -- would increase as well. At first, I thought the end behaviour of $P(n)$ would approach infinity, or $\lim\limits_{n\to \infty}P(n) = \infty$. Wrong!</p>
+<p>Then, I thought that maybe $P$ would approach some value to form an asymptote. This is a bit more accurate. But what value does $P$ approach?&nbsp;</p>
+<p>Without including a huge explanation about <a href="https://en.wikipedia.org/wiki/Derangement">derangement</a>, I'll cheat a little and use a general formula. For $n$ hats, the probability $P$ of an&nbsp;<strong>incorrect</strong> match is defined as: $$P(n) = 1 - \frac{1}{1!} + \frac{1}{2!} - \frac{1}{3!} + \cdots + \frac{(-1)^n}{n!}$$</p>
+<p>One interesting thing to notice about this equation is the $n$th power on the numerator. If you remember your highschool math, you'll notice that for all terms where $n$ is <em>odd</em>, that term will be&nbsp;<em>negative</em>, and vice versa. This is because a negative multiplied by a negative is a positive, but a positive multiplied by a negative is negative. To illustrate: $$(-1)^2 = (-1) \cdot (-1) = 1$$ $$(-1)^1 = (-1)$$&nbsp;&nbsp;</p>
+<p>Therefore, the sign of each term switches.&nbsp;</p>
+<p>I want to know what happens as $n\to \infty$, but at first glance, I can't figure out a way to solve a limit with a factorial in it: $$\lim_{n\to \infty}(1 - \frac{(-1)^n}{n!})$$</p>
+<p>It's probably the easiest to solve using the <a href="https://en.wikipedia.org/wiki/Squeeze_theorem">squeeze theorem</a>, but I bet I can do it in 6 lines of Python.</p>
+<p>First, let's import the math module and name our function:</p>
+<pre>#the_hat_problem.py<br />import math<br /><br />def P(n):<br />    # code here</pre>
+<p>Next, we need to translate our general equation,&nbsp;$P(n) = 1 + \frac{(-1)^n}{n!}$, into Python code. First, we'll create a variable&nbsp;<code>terms</code>&nbsp;. For every hat, we will compute the term and add it to <code>terms</code>.&nbsp;Finally, we will subtract <code>terms</code> from 1.</p>
+<pre>#the_hat_problem.py<br />import math<br /><br />def P(n):<br />&nbsp; &nbsp; terms = 0<br />&nbsp; &nbsp; for x in range(1, n+1):<br />&nbsp; &nbsp; &nbsp; &nbsp; terms -= (math.pow(-1.0, x)) / math.factorial(x)<br />&nbsp; &nbsp; return 1 - terms</pre>
+<p>So, now we have a way to compute the probability of an incorrect match for $n$ hats. Let's test it out: for one hat, $P(1) = 0\%$, since there is only one possible match. For two hats, $P(2) = 50\%$.&nbsp;</p>
+<blockquote>It's interesting to note that for the second two whole values of $n$, $2$ and $3$, $P(n)$ is perfectly approximated by $\frac{1}{n}$. For example, $P(2) = 0.5 = \frac{1}{n} = 0.5$</blockquote>
+<p>Sanity check:</p>
+<pre>&gt;&gt;&gt; from the_hat_problem import P<br />&gt;&gt;&gt; P(1)<br />0.0<br />&gt;&gt;&gt; P(2)<br />0.5<br />&gt;&gt;&gt; P(3)<br />0.33333333333333337</pre>
+<p>&nbsp;So far, so good!</p>
+<h2>This one goes to eleven</h2>
+<p>Let's return to our original goal of determining the end behaviour of $P(n)$. Using a larger value of $n$:</p>
+<pre>&gt;&gt;&gt; P(50)<br />0.3678794411714422<br />&gt;&gt;&gt; P(100)<br />0.3678794411714422</pre>
+<p>That's weird... $P(50)$ and $P(100)$ are equal to at least 16 digits. It looks like the function converges on $0.3678794411714422$, but what is that numbers signifigance?</p>
+<h2>If $\frac{d}{dx}i^x = i^x$, what is $i$?</h2>
+<p>Chances are you don't recognize the number $0.3678794411\ldots$ at first glance. However, you might've heard of the number $e$. It just happens that&nbsp;$0.3678794411\ldots$ is the inverse of $e$, or $\frac{1}{e}$. At times like these, I find the quote below to be useful.</p>
+<blockquote>In mathematics you don't understand things. You just get used to them. <br />- John von Neumann</blockquote>
+<p>&nbsp;So how does $e$ relate to this equation? I really don't know, but at least we can tentatively say that: $$\lim_{n\to \infty}(1 - \frac{1}{1!} + \frac{1}{2!} - \frac{1}{3!} + \cdots + \frac{(-1)^n}{n!}) \approx \frac{1}{e} $$</p>
+<p>We can prove, at least to 15 digits (the last one might be rounded) that this is true.&nbsp;</p>
+<h2>What does it look like?</h2>
+<p>I'm curious to see a graph of our data, let's try it:</p>
+<pre>&gt;&gt;&gt; y = [P(x) for x in range(0, 100)]<br />&gt;&gt;&gt; plt.plot(range(0, 100), y)<br />&gt;&gt;&gt; plt.show()</pre>
+<p>I get a nice graph that looks like this:</p>
+<p><img src="/static/media/uploads/figure_1_hat.png" alt="" width="600" height="452" /></p>
+<p>It's evident that $P(n)$ settles on $e$ quite quickly, by around $n = 5$ or $6$. That's really fast! By the time you have 5 hats in the mix, you're already looking at a probability of $\frac{1}{e}$ for zero matches. What about a higher resolution of $n$?</p>
+<p>&nbsp;</p>
